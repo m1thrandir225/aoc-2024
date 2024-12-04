@@ -1,10 +1,10 @@
 package day1
 
 import (
+	"aoc_2024/util"
 	"bufio"
 	"fmt"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -29,8 +29,8 @@ func Day1PartOne(filename string) {
 		firstList = append(firstList, first)
 		secondList = append(secondList, second)
 	}
-	sortByLowest(firstList)
-	sortByLowest(secondList)
+	firstList = util.SortByLowest(firstList)
+	secondList = util.SortByLowest(secondList)
 	for i := range firstList {
 		var distance int
 		if firstList[i] > secondList[i] {
@@ -41,7 +41,7 @@ func Day1PartOne(filename string) {
 		differences = append(differences, distance)
 	}
 
-	sum := sumList(differences)
+	sum := util.SumItems(differences)
 
 	fmt.Println(sum)
 
@@ -67,43 +67,17 @@ func Day1PartTwo(filename string) {
 		firstList = append(firstList, first)
 		secondList = append(secondList, second)
 	}
-	sortByLowest(firstList)
-	sortByLowest(secondList)
+	firstList = util.SortByLowest(firstList)
+	secondList = util.SortByLowest(secondList)
 
 	for i := range firstList {
 		current := firstList[i]
-		occurrence := checkOccurrences(secondList, current)
+		occurrence := util.CheckItemOccurrence(secondList, current)
 
 		simillarity := current * occurrence
 		listSimillarity = append(listSimillarity, simillarity)
 	}
 
-	similarityScore := sumList(listSimillarity)
+	similarityScore := util.SumItems(listSimillarity)
 	fmt.Println(similarityScore)
-}
-
-func checkOccurrences(list []int, number int) int {
-	occurrence := 0
-	for i := range list {
-		if list[i] == number {
-			occurrence++
-		}
-	}
-	return occurrence
-}
-
-func sortByLowest(list []int) []int {
-	sortedList := list
-
-	sort.Ints(sortedList)
-
-	return sortedList
-}
-
-func sumList(list []int) int {
-	sum := 0
-	for _, v := range list {
-		sum += v
-	}
-	return sum
 }

@@ -1,43 +1,26 @@
 package day3
 
 import (
+	"aoc_2024/util"
 	"fmt"
-	"io"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
 func Day3PartOne(filename string) {
-	//multipliers := make([]int, 0)
+	text := util.ParseToString(filename)
 
-	f, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	b, err := io.ReadAll(f)
-
-	textString := string(b)
-
-	matches := getMatches(textString)
+	matches := getMatches(text)
 	result := parseMatches(matches)
 
 	fmt.Println(result)
 }
 
 func Day3PartTwo(filename string) {
-	f, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	b, err := io.ReadAll(f)
+	text := util.ParseToString(filename)
 
-	textString := string(b)
-
-	matches := getMatchesWithDos(textString)
+	matches := getMatchesWithDos(text)
 	result := parseMatches(matches)
 	fmt.Println(result)
 }

@@ -1,6 +1,7 @@
 package day2
 
 import (
+	"aoc_2024/util"
 	"bufio"
 	"fmt"
 	"math"
@@ -11,7 +12,6 @@ import (
 
 func Day2PartOne(filename string) {
 	lists := make([][]int, 0)
-
 	f, err := os.Open(filename)
 	if err != nil {
 		panic(err)
@@ -78,15 +78,6 @@ func Day2PartTwo(filename string) {
 	fmt.Println(validCounter)
 }
 
-func isIncreasing(numbers []int) bool {
-	for i := 0; i < len(numbers)-1; i++ {
-		if numbers[i] >= numbers[i+1] {
-			return false
-		}
-	}
-	return true
-}
-
 func canBecomeValid(row []int) bool {
 	for i := range row {
 		//remove current number from the array and check if its a valid row
@@ -101,19 +92,10 @@ func canBecomeValid(row []int) bool {
 	return false
 }
 
-func isDecreasing(numbers []int) bool {
-	for i := 0; i < len(numbers)-1; i++ {
-		if numbers[i] <= numbers[i+1] {
-			return false
-		}
-	}
-	return true
-}
-
 func isValid(list []int) bool {
 	difference := 0
-	listIncreasing := isIncreasing(list)
-	listDecreasing := isDecreasing(list)
+	listIncreasing := util.IsListIncreasing(list)
+	listDecreasing := util.IsListDecreasing(list)
 
 	if !listIncreasing && !listDecreasing {
 		return false

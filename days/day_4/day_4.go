@@ -1,49 +1,21 @@
 package day4
 
 import (
-	"bufio"
+	"aoc_2024/util"
 	"fmt"
-	"os"
 )
 
 func Day4PartOne(filename string) {
-	matrix := make([][]rune, 0)
-
-	f, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := scanner.Text()
-		itemsRune := []rune(line)
-		matrix = append(matrix, itemsRune)
-	}
+	grid := util.ParseToGrid(filename)
 
 	word := "XMAS"
-	res := searchWord(matrix, word)
+	res := searchWord(grid, word)
 	fmt.Println(res)
 }
 
 func Day4PartTwo(filename string) {
-	grid := make([][]rune, 0)
+	grid := util.ParseToGrid(filename)
 
-	f, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := scanner.Text()
-		itemsRune := []rune(line)
-		grid = append(grid, itemsRune)
-	}
 	results := countXInGrid(grid)
 	fmt.Println(results)
 }
