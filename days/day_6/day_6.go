@@ -1,155 +1,150 @@
 package day6
 
 import (
-	"aoc_2024/util"
+	"bufio"
 	"fmt"
+	"os"
+
+	"github.com/lucianoq/container/set"
 )
 
-type Position struct {
-	x, y int
+type State struct {
+	Pos P
+	Dir uint8
+}
+
+var Size = 130
+
+const (
+	N uint8 = iota
+	E
+	S
+	W
+)
+
+type P struct{ x, y int }
+
+func parseMap(filename string) (map[P]struct{}, P, uint8) {
+	var pos P
+	f, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	m := map[P]struct{}{}
+	for i := 0; scanner.Scan(); i++ {
+		line := scanner.Text()
+		for j, c := range line {
+			switch c {
+			case '#':
+				m[P{i, j}] = struct{}{}
+			case '^':
+				pos = P{i, j}
+			}
+		}
+	}
+	return m, pos, N
 }
 
 func Day6PartOne(filename string) {
-	grid := util.ParseToGrid(filename)
-	row_start, col_start := getGuardStartingPosition(grid)
-	guard := Guard{
-		x:            row_start,
-		y:            col_start,
-		max_x:        len(grid),
-		max_y:        len(grid[0]),
-		passedRoutes: make([]Position, 0),
-		direction:    "up",
+	m, p, dir := parseMap(filename)
+	visited := set.Set[P]{}
+	visited.Add(p)
+
+	for {
+		var next P
+
+		switch dir {
+		case N:
+			next = P{p.x - 1, p.y}
+		case E:
+			next = P{p.x, p.y + 1}
+		case S:
+			next = P{p.x + 1, p.y}
+		case W:
+			next = P{p.x, p.y - 1}
+		}
+
+		if next.x < 0 || next.x >= Size || next.y < 0 || next.y >= Size {
+			break
+		}
+
+		if _, ok := m[next]; ok {
+			dir = (dir + 1) % 4
+		} else {
+			p = next
+			visited.Add(p)
+		}
 	}
-	guard.calculateRoute(grid)
+
+	fmt.Println(visited.Len())
 }
 
-func Day6PartTwo(filename string) {}
+func Day6PartTwo(filename string) {
+	m, p, dir := parseMap(filename)
 
-func getGuardStartingPosition(grid [][]rune) (int, int) {
-	for i := range grid {
-		for j := range grid[i] {
-			if grid[i][j] == 94 {
-				return i, j
+	var count int
+	for i := 0; i < Size; i++ {
+		for j := 0; j < Size; j++ {
+			if testObstacle(m, P{i, j}, p, dir) {
+				count++
 			}
 		}
 	}
-	return 0, 0
+
+	fmt.Println(count)
 }
 
-type Guard struct {
-	x            int
-	y            int
-	max_y        int
-	max_x        int
-	passedRoutes []Position
-	direction    string
-}
+func testObstacle(m map[P]struct{}, obstacle, pos P, dir uint8) bool {
 
-func (guard *Guard) calculateRoute(grid [][]rune) {
-	width := grid
-	height := grid[0]
-	for guard.x < len(width) {
-		for guard.y < len(height) {
-			toTurn, direction := guard.NeedsToTurn(grid)
-			if toTurn {
-				guard.turnDirection(grid, direction)
-			}
-			guard.move(grid)
-			fmt.Println(len(guard.passedRoutes))
-			fmt.Println("--------------------")
-		}
-
-	}
-}
-
-func (guard *Guard) move(grid [][]rune) {
-	switch guard.direction {
-	case "up":
-		grid[guard.x][guard.y] = 46
-		grid[guard.x-1][guard.y] = 96
-		guard.x--
-		guard.addToPositions(guard.x, guard.y)
-	case "down":
-		grid[guard.x][guard.y] = 46
-		grid[guard.x+1][guard.y] = 96
-		guard.x++
-		guard.addToPositions(guard.x, guard.y)
-
-	case "left":
-		grid[guard.x][guard.y] = 46
-		grid[guard.x][guard.y-1] = 96
-		guard.y--
-		guard.addToPositions(guard.x, guard.y)
-	case "right":
-		grid[guard.x][guard.y] = 46
-		grid[guard.x][guard.y+1] = 96
-
-		guard.y++
-		guard.addToPositions(guard.x, guard.y)
-	}
-}
-
-// Returns if the guard needs to turn and the next direction
-func (guard *Guard) NeedsToTurn(grid [][]rune) (bool, string) {
-	switch guard.direction {
-	case "up":
-		if grid[guard.x-1][guard.y] == 35 {
-			return true, "right"
-		}
-	case "down":
-		if grid[guard.x+1][guard.y] == 35 {
-			return true, "left"
-		}
-	case "right":
-		if grid[guard.x][guard.y+1] == 35 {
-			return true, "down"
-		}
-	case "left":
-		if grid[guard.x][guard.y-1] == 35 {
-			return true, "up"
-		}
-	}
-	return false, ""
-}
-
-func (guard *Guard) turnDirection(grid [][]rune, direction string) {
-	switch direction {
-	case "up":
-		grid[guard.x][guard.y] = 96
-		guard.direction = "up"
-	case "down":
-		grid[guard.x][guard.y] = 118
-		guard.direction = "down"
-	case "left":
-		grid[guard.x][guard.y] = 60
-		guard.direction = "left"
-	case "right":
-		grid[guard.x][guard.y] = 62
-		guard.direction = "right"
-	}
-}
-
-func (guard *Guard) addToPositions(row, col int) {
-	// First check if position already exists
-	for _, current := range guard.passedRoutes {
-		if current.x == row && current.y == col {
-			return // Exit if position already exists
-		}
+	// impossible if the guard is there
+	if obstacle == pos {
+		return false
 	}
 
-	// If we've gotten here, the position is unique
-	newPosition := Position{
-		x: row,
-		y: col,
+	// impossible if there is already an obstacle there
+	if _, ok := m[obstacle]; ok {
+		return false
 	}
-	guard.passedRoutes = append(guard.passedRoutes, newPosition)
-}
 
-func printGrid(grid [][]rune) {
-	for _, row := range grid {
-		for _, char := range row {
-			fmt.Print(string(char))
+	m[obstacle] = struct{}{}
+	defer func() {
+		delete(m, obstacle)
+	}()
+
+	visited := set.Set[State]{}
+	visited.Add(State{pos, dir})
+
+	for {
+		var next P
+
+		switch dir {
+		case N:
+			next = P{pos.x - 1, pos.y}
+		case E:
+			next = P{pos.x, pos.y + 1}
+		case S:
+			next = P{pos.x + 1, pos.y}
+		case W:
+			next = P{pos.x, pos.y - 1}
 		}
-		fmt.Println()
+
+		if next.x < 0 || next.x >= Size || next.y < 0 || next.y >= Size {
+			return false
+		}
+
+		if _, ok := m[next]; ok {
+			dir = (dir + 1) % 4
+		} else {
+			pos = next
+		}
+
+		newState := State{pos, dir}
+		if visited.Contains(newState) {
+			return true
+		}
+		visited.Add(newState)
 	}
 }
