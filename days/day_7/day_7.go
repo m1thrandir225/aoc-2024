@@ -54,7 +54,9 @@ func evaluate(nums []int, operatorLenght int, operator string) int {
 }
 
 func matchTarget(nums []int, target int, operatorsLenght int, index int, calculated map[int]bool) {
-
+	if index == len(nums) {
+		result := evaluate(nums, , operator string)
+	}
 }
 
 func Day7PartTwo(filename string) {}
