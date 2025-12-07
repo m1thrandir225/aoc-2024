@@ -35,12 +35,15 @@ func Day9PartOne(filename string) {
 
 	fmt.Println(filesArray)
 	fmt.Println(spaceArray)
-
 }
 
 func makeRow(files, space []int) string {
 	if len(files) != len(space) {
 		return ""
 	}
+	for i := 0; i < len(files); i++ {
+	}
+
+	return ""
 }
 func Day9PartTwo(filename string) {}
